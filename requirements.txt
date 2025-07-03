@@ -1,0 +1,8 @@
+dvc
+dvc[all]
+pandas
+scikit-learn
+torch
+torchvision
+requests
+xgboost

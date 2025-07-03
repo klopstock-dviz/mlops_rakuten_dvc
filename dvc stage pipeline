@@ -1,0 +1,55 @@
+dvc stage add -n train-test-split --force\
+              -d src/models/train_test_split.py -d src/data \
+              -o data/processed_data/_split \
+              python src/models/train_test_split.py
+
+dvc stage add -n scaling --force\
+              -d src/models/scaling.py -d data/processed_data/_split \
+              -o data/processed_data/_scaling \
+              python src/models/scaling.py              
+
+dvc stage add -n gridsearch --force\
+              -d src/models/gridsearch.py \
+              -d data/processed_data/_split \
+              -d data/processed_data/_scaling \
+              -o models/best_params \
+              python src/models/gridsearch.py                            
+
+dvc stage add -n train --force\
+              -d src/models/train.py \
+              -d data/processed_data/_split \
+              -d data/processed_data/_scaling \
+              -d models/best_params \
+              -o models/best_models \
+              python src/models/train.py 
+
+dvc stage add -n evaluation --force\
+              -d src/models/evaluation.py \
+              -d data/processed_data/_split \
+              -d data/processed_data/_scaling \
+              -d models/best_models \
+              -o metrics \
+              python src/models/evaluation.py               
+
+
+
+#====from dagshub remote options -> DVC
+# add a dagshub DVC remote:
+dvc remote add origin s3://dvc
+dvc remote modify origin endpointurl https://dagshub.com/klopstock-dviz/examen-dvc.s3
+
+# credentials
+dvc remote modify origin --local access_key_id be5a4f632b04628e647780bc8ee389b62b77feea
+dvc remote modify origin --local secret_access_key be5a4f632b04628e647780bc8ee389b62b77feea
+
+dvc remote default origin
+
+dvc push
+
+
+git add metrics/scores.json dvc.lock dvc.yaml .gitignore
+git commit -m "Pipeline : Trained and evaluated RF, best_params.pkl, r2 = 7323"
+
+dvc commit
+dvc push
+git push origin HEAD:accidents_v2 
