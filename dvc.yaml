@@ -1,0 +1,33 @@
+stages:
+  train-test-split:
+    cmd: python src/models/split_data.py
+    deps:
+    - src/data
+    - src/models/split_data.py
+    outs:
+    - data/processed_data/_split
+  vectorization:
+    cmd: python src/models/vectorization.py
+    deps:
+    - data/processed_data/_split
+    - src/models/vectorization.py
+    outs:
+    - data/processed_data/_vectorized
+  gridsearch:
+    cmd: python models/gridSearch_mlp.py
+    deps:
+    - data/processed_data/_split
+    - data/processed_data/_vectorized
+    - models/gridSearch_mlp.py
+    outs:
+    - models/best_models
+    - models/best_params
+  evaluation:
+    cmd: python models/evaluation.py
+    deps:
+    - data/processed_data/_split
+    - data/processed_data/_vectorized
+    - models/best_models
+    - models/evaluation.py
+    outs:
+    - metrics

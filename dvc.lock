@@ -1,0 +1,94 @@
+schema: '2.0'
+stages:
+  train-test-split:
+    cmd: python src/models/split_data.py
+    deps:
+    - path: src/data
+      hash: md5
+      md5: e7340ffd54cfbf93e73a3908bcb4ee80.dir
+      size: 63854373
+      nfiles: 3
+    - path: src/models/split_data.py
+      hash: md5
+      md5: 92f3f75c7cb0adbbe085ebde6bf3df88
+      size: 1738
+    outs:
+    - path: data/processed_data/_split
+      hash: md5
+      md5: 37dde9063017bd2e5488359ae1085950.dir
+      size: 358769
+      nfiles: 4
+  vectorization:
+    cmd: python src/models/vectorization.py
+    deps:
+    - path: data/processed_data/_split
+      hash: md5
+      md5: 37dde9063017bd2e5488359ae1085950.dir
+      size: 358769
+      nfiles: 4
+    - path: src/models/vectorization.py
+      hash: md5
+      md5: 68d699447d21e0e7808e4250efc42e90
+      size: 1344
+    outs:
+    - path: data/processed_data/_vectorized
+      hash: md5
+      md5: c2f2202e12df43d7a2d7300040bbb718.dir
+      size: 588680
+      nfiles: 2
+  gridsearch:
+    cmd: python models/gridSearch_mlp.py
+    deps:
+    - path: data/processed_data/_split
+      hash: md5
+      md5: 37dde9063017bd2e5488359ae1085950.dir
+      size: 358769
+      nfiles: 4
+    - path: data/processed_data/_vectorized
+      hash: md5
+      md5: c2f2202e12df43d7a2d7300040bbb718.dir
+      size: 588680
+      nfiles: 2
+    - path: models/gridSearch_mlp.py
+      hash: md5
+      md5: e4a544d3d14a60c80104022b66959e10
+      size: 3824
+    outs:
+    - path: models/best_models
+      hash: md5
+      md5: 0e73a1d3f04bf6691adb9b597295debf.dir
+      size: 24075654
+      nfiles: 1
+    - path: models/best_params
+      hash: md5
+      md5: aa07d9f73b427bcf1257c00a8de4d8ce.dir
+      size: 61
+      nfiles: 1
+  evaluation:
+    cmd: python models/evaluation.py
+    deps:
+    - path: data/processed_data/_split
+      hash: md5
+      md5: 37dde9063017bd2e5488359ae1085950.dir
+      size: 358769
+      nfiles: 4
+    - path: data/processed_data/_vectorized
+      hash: md5
+      md5: c2f2202e12df43d7a2d7300040bbb718.dir
+      size: 588680
+      nfiles: 2
+    - path: models/best_models
+      hash: md5
+      md5: 0e73a1d3f04bf6691adb9b597295debf.dir
+      size: 24075654
+      nfiles: 1
+    - path: models/evaluation.py
+      hash: md5
+      md5: e2e1a948f2fd3ecba7bddc5ae703ef35
+      size: 1838
+    outs:
+    - path: metrics
+      hash: md5
+      md5: 7be73de0f1b1dd913d294f82fd4511f8.dir
+      size: 2331
+      nfiles: 2
