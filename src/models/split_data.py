@@ -32,7 +32,7 @@ def main(subset_size_frac):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
-
+    (data_dir_out).mkdir(parents=True, exist_ok=True)
     pd.DataFrame(X_train).reset_index(drop=True).to_csv(data_dir_out/"X_train.csv")
     pd.DataFrame(X_test).reset_index(drop=True).to_csv(data_dir_out/"X_test.csv")
     pd.DataFrame(y_train).reset_index(drop=True).to_csv(data_dir_out/"y_train.csv")
@@ -40,5 +40,5 @@ def main(subset_size_frac):
 
 
 if __name__=="__main__":
-    subset_size_frac=os.environ.get("train_size") or 0.25
+    subset_size_frac=os.environ.get("train_size") or 0.05
     main(subset_size_frac)

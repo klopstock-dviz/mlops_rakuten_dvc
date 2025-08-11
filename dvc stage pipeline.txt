@@ -1,0 +1,49 @@
+dvc init
+
+dvc stage add -n train-test-split --force\
+              -d src/models/split_data.py -d src/data \
+              -o data/processed_data/_split \
+              python src/models/split_data.py
+
+dvc stage add -n vectorization --force\
+              -d src/models/vectorization.py \
+              -d data/processed_data/_split \
+              -o data/processed_data/_vectorized \
+              python src/models/vectorization.py
+
+dvc stage add -n gridsearch --force\
+              -d models/gridSearch_mlp.py \
+              -d data/processed_data/_split \
+              -d data/processed_data/_vectorized \
+              -o models/best_params \
+              -o models/best_models \
+              python models/gridSearch_mlp.py                            
+
+dvc stage add -n evaluation --force\
+              -d models/evaluation.py \
+              -d data/processed_data/_split \
+              -d data/processed_data/_vectorized \
+              -d models/best_models \
+              -o metrics \
+              python models/evaluation.py                            
+
+
+
+#====from dagshub remote options -> DVC
+# add a dagshub DVC remote:
+dvc remote add origin s3://dvc
+dvc remote modify origin endpointurl https://dagshub.com/klopstock-dviz/mlops_rakuten_dvc.s3
+
+# credentials
+dvc remote modify origin --local access_key_id be5a4f632b04628e647780bc8ee389b62b77feea
+dvc remote modify origin --local secret_access_key be5a4f632b04628e647780bc8ee389b62b77feea
+
+dvc remote default origin
+
+
+git add metrics/best_f1_score.json dvc.lock dvc.yaml .gitignore
+git commit -m "Pipeline : Trained and evaluated MLP, best_params.pkl, f& weighted = 0.6743"
+
+dvc commit
+dvc push
+git push

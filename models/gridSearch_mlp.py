@@ -23,7 +23,9 @@ print(f"Used threads:", n_threads)
 root_dir = Path(__file__).resolve()
 data_dir_in_1 = root_dir.parent.parent / "data/processed_data/_split"
 data_dir_in_2 = root_dir.parent.parent / "data/processed_data/_vectorized"
-data_dir_out = root_dir.parent
+dir_models_out=root_dir.parent.parent/"models/best_models"
+dir_params_out=root_dir.parent.parent/"models/best_params"
+
 
 
 def main():
@@ -57,20 +59,20 @@ def main():
 
     batch_sizes=[16, 32, 64, 128]
         
-    alpha_l2=[0.001, 0.01, 0.1]
+    alpha_l2=[0.0001, 0.001, 0.01, 0.1]
 
     grid_params=list(product(layers, batch_sizes, alpha_l2))
     print(f"Nb of params: ", len(grid_params))
     history_models=[]
 
     i=1
-    for layer, batch_size, alpha in grid_params[:3]:
+    for layer, batch_size, alpha in grid_params[:2]:
         print(f'layer: {layer}, batch_size: {batch_size}, alpha: {alpha}')
         print(f"param {i}/{len(grid_params)}")
         # Define the MLPClassifier
         mlp_model = MLPClassifier(
             hidden_layer_sizes=layer, 
-            max_iter=25, random_state=42, 
+            max_iter=15, random_state=42, 
             early_stopping=True,
             n_iter_no_change=5,
             verbose=1,
@@ -112,18 +114,13 @@ def main():
     print("Meilleur score : ", best_f1_score)
     
 
-    (data_dir_out/"models/best_params").mkdir(parents=True, exist_ok=True)
-    with open(data_dir_out/ 'models/best_params/best_params.pkl', 'wb') as f:
+    (dir_params_out).mkdir(parents=True, exist_ok=True)
+    with open(dir_params_out/ 'best_params.pkl', 'wb') as f:
         pickle.dump(best_params, f)
 
-    (data_dir_out/"models/best_models").mkdir(parents=True, exist_ok=True)
-    with open(data_dir_out/ 'models/best_models/best_model.pkl', 'wb') as f:
+    (dir_models_out).mkdir(parents=True, exist_ok=True)
+    with open(dir_models_out/ 'best_model.pkl', 'wb') as f:
         pickle.dump(best_model, f)       
-
-    (data_dir_out/"metrics").mkdir(parents=True, exist_ok=True)
-    f1_score_path = data_dir_out / 'metrics/best_f1_score.json'
-    with open(f1_score_path, 'w') as f:
-        json.dump({"f1_score_weighted": best_f1_score}, f)
 
 
 if __name__=="__main__":
